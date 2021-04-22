@@ -2,29 +2,49 @@ package main
 
 import "fmt"
 
-var data = [][][]int{}
+var data = []string{}
 
 func main() {
-	// tamaño := 4
-	// cantidad_fils := 4
+	tamaño := 4
+	total_casillas := [][]int{}
 
-	total_casillas := [][]int{
-		{1, 1}, {1, 2}, {1, 3}, {1, 4},
-		{2, 1}, {2, 2}, {2, 3}, {2, 4},
-		{3, 1}, {3, 2}, {3, 3}, {3, 4},
-		{4, 1}, {4, 2}, {4, 3}, {4, 4},
+	for i := 1; i <= tamaño; i++ {
+		for j := 1; j <= tamaño; j++ {
+			aux := []int{i, j}
+			total_casillas = append(total_casillas, aux)
+		}
 	}
+	// total_casillas := [][]int{
+	// 	{1, 1}, {1, 2}, {1, 3}, {1, 4},
+	// 	{2, 1}, {2, 2}, {2, 3}, {2, 4},
+	// 	{3, 1}, {3, 2}, {3, 3}, {3, 4},
+	// 	{4, 1}, {4, 2}, {4, 3}, {4, 4},
+	// }
 
-	casillasIniciales := [][]int{
-		{1, 1}, {1, 2}, {1, 3}, {1, 4},
+	// casillasIniciales := [][]int{
+	// 	{1, 1}, {1, 2}, {1, 3}, {1, 4},
+	// }
+
+	primerAnalisi(4, total_casillas)
+
+}
+
+func primerAnalisi(tamaño int, casillasTotales [][]int) {
+	// fmt.Println("iniciando analisis")
+	casillasIniciales := [][]int{}
+	for _, casI := range casillasTotales {
+		if casI[0] != 1 {
+			break
+		}
+		casillasIniciales = append(casillasIniciales, casI)
 	}
 
 	for _, casI := range casillasIniciales {
-		prueba(casI, total_casillas, [][]int{}, 1)
+		analizar(casI, casillasTotales, [][]int{}, 1)
 	}
-
 }
-func prueba(casillaI []int, casillasLibres, reinasColocadas [][]int, columnaActual int) {
+
+func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int, columnaActual int) {
 
 	// fmt.Printf("nueva reina : %v\n", casillaI)
 
@@ -32,8 +52,6 @@ func prueba(casillaI []int, casillasLibres, reinasColocadas [][]int, columnaActu
 	// fmt.Printf("limpias : %v\n", casillasLimpias)
 
 	reisColocadas := reinasColocadas
-	// make([][]int, len(reinasColocadas))
-	// copy(reisColocadas, reinasColocadas)
 	// fmt.Printf("reinas: %v\n", casillaI)
 
 	reisColocadas = append(reisColocadas, casillaI)
@@ -59,11 +77,10 @@ func prueba(casillaI []int, casillasLibres, reinasColocadas [][]int, columnaActu
 
 		// if len(casillasSiguientes) > 0 {
 		for _, casS := range casillasSiguientes {
-			prueba(casS, casillasLimpias, reisColocadas, columnaActual+1)
+			analizar(casS, casillasLimpias, reisColocadas, columnaActual+1)
 		}
 		// }
 	}
-
 }
 
 func limpiar(casillasLibres [][]int, nuevaReina []int) [][]int {
