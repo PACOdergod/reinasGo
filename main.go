@@ -5,7 +5,7 @@ import "fmt"
 var data = []string{}
 
 func main() {
-	tamaño := 4
+	tamaño := 5
 	total_casillas := [][]int{}
 
 	for i := 1; i <= tamaño; i++ {
@@ -39,12 +39,15 @@ func primerAnalisi(tamaño int, casillasTotales [][]int) {
 		casillasIniciales = append(casillasIniciales, casI)
 	}
 
+	// aqui empieza el analisis
 	for _, casI := range casillasIniciales {
 		analizar(casI, casillasTotales, [][]int{}, 1)
 	}
 }
 
-func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int, columnaActual int) {
+func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
+	columnaActual int,
+) {
 
 	// fmt.Printf("nueva reina : %v\n", casillaI)
 
@@ -75,11 +78,9 @@ func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int, columnaAc
 			}
 		}
 
-		// if len(casillasSiguientes) > 0 {
 		for _, casS := range casillasSiguientes {
 			analizar(casS, casillasLimpias, reisColocadas, columnaActual+1)
 		}
-		// }
 	}
 }
 
