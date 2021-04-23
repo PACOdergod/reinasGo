@@ -1,14 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
 
 var data = []string{}
 var tamaño = 0
 var iteraciones int = 0
 var combinaciones int = 0
 
+var wg sync.WaitGroup
+
 func main() {
-	tamaño = 4
+	tamaño = 8
 	total_casillas := [][]int{}
 
 	for i := 1; i <= tamaño; i++ {
@@ -17,20 +22,12 @@ func main() {
 			total_casillas = append(total_casillas, aux)
 		}
 	}
-	// total_casillas := [][]int{
-	// 	{1, 1}, {1, 2}, {1, 3}, {1, 4},
-	// 	{2, 1}, {2, 2}, {2, 3}, {2, 4},
-	// 	{3, 1}, {3, 2}, {3, 3}, {3, 4},
-	// 	{4, 1}, {4, 2}, {4, 3}, {4, 4},
-	// }
-
-	// casillasIniciales := [][]int{
-	// 	{1, 1}, {1, 2}, {1, 3}, {1, 4},
-	// }
 
 	primerAnalisi(tamaño, total_casillas)
 
-	fmt.Println(iteraciones)
+	// time.Sleep(2 * time.Second)
+
+	fmt.Println("iteraciones finales ", iteraciones)
 	fmt.Println(combinaciones)
 
 }
@@ -45,16 +42,37 @@ func primerAnalisi(tamaño int, casillasTotales [][]int) {
 		casillasIniciales = append(casillasIniciales, casI)
 	}
 
+	iterChan := make(chan bool)
+
+	// wg.Add(1)
+	go func() {
+		iterNums := 0
+		for {
+			if <-iterChan {
+				fmt.Println("comb")
+				iterNums++
+				// if iterNums == iteraciones {
+				// 	wg.Done()
+				// 	break
+				// }
+			}
+		}
+	}()
+
 	// aqui empieza el analisis
+	// iteraciones = iteraciones + len(casillasIniciales)
+	wg.Add(len(casillasIniciales))
 	for _, casI := range casillasIniciales {
-		analizar(casI, casillasTotales, [][]int{}, 1)
+		iteraciones++
+		// wg.Add(1)
+		go analizar(casI, casillasTotales, [][]int{}, 1, iterChan)
 	}
+	wg.Wait()
+
 }
 
 func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
-	columnaActual int) {
-
-	iteraciones++
+	columnaActual int, iterChan chan bool) {
 
 	// fmt.Printf("nueva reina : %v\n", casillaI)
 	casillasLimpias := limpiar(casillasLibres, casillaI)
@@ -63,13 +81,20 @@ func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
 	// fmt.Printf("reinas: %v\n", casillaI)
 	reisColocadas = append(reisColocadas, casillaI)
 
-	if len(casillasLimpias) == 0 && len(reisColocadas) == tamaño {
+	if len(casillasLimpias) == 0 {
 		// ya no quedan casillas libres
-		// aui encontro una combinacion
-		// TODO: debe guardar la combinacion como string
 		// data = append(data, reisColocadas)
-		// fmt.Printf("combinacion: %v\n", reisColocadas)
-		combinaciones++
+
+		if len(reisColocadas) == tamaño {
+			// aui encontro una combinacion valida
+			// TODO: debe guardar la combinacion como string
+			fmt.Printf("combinacion: %v\n", reisColocadas)
+			combinaciones++
+			iterChan <- true
+			wg.Done()
+		} else {
+			wg.Done()
+		}
 	}
 	if len(casillasLimpias) > 0 {
 		// todavia quedan casillas a analizar
@@ -85,9 +110,22 @@ func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
 			}
 		}
 
-		for _, casS := range casillasSiguientes {
-			analizar(casS, casillasLimpias, reisColocadas, columnaActual+1)
+		if len(casillasSiguientes) > 0 {
+			// iteraciones = iteraciones + len(casillasSiguientes)
+			wg.Add(len(casillasSiguientes))
+			for _, casS := range casillasSiguientes {
+				iteraciones++
+				go analizar(casS, casillasLimpias, reisColocadas, columnaActual+1, iterChan)
+			}
+			wg.Done()
+		} else {
+			// ya no hay casillas de la columna siguiente
+			// y no hay nada que hacer
+			iterChan <- true
+			wg.Done()
+
 		}
+
 	}
 }
 
