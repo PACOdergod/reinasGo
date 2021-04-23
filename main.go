@@ -13,7 +13,7 @@ var combinaciones int = 0
 var wg sync.WaitGroup
 
 func main() {
-	tamaño = 8
+	tamaño = 13
 	total_casillas := [][]int{}
 
 	for i := 1; i <= tamaño; i++ {
@@ -24,11 +24,8 @@ func main() {
 	}
 
 	primerAnalisi(tamaño, total_casillas)
-
-	// time.Sleep(2 * time.Second)
-
 	fmt.Println("iteraciones finales ", iteraciones)
-	fmt.Println(combinaciones)
+	fmt.Println("combinaciones totales: ", combinaciones)
 
 }
 
@@ -42,37 +39,19 @@ func primerAnalisi(tamaño int, casillasTotales [][]int) {
 		casillasIniciales = append(casillasIniciales, casI)
 	}
 
-	iterChan := make(chan bool)
-
-	// wg.Add(1)
-	go func() {
-		iterNums := 0
-		for {
-			if <-iterChan {
-				fmt.Println("comb")
-				iterNums++
-				// if iterNums == iteraciones {
-				// 	wg.Done()
-				// 	break
-				// }
-			}
-		}
-	}()
-
 	// aqui empieza el analisis
-	// iteraciones = iteraciones + len(casillasIniciales)
 	wg.Add(len(casillasIniciales))
 	for _, casI := range casillasIniciales {
 		iteraciones++
 		// wg.Add(1)
-		go analizar(casI, casillasTotales, [][]int{}, 1, iterChan)
+		go analizar(casI, casillasTotales, [][]int{}, 1)
 	}
 	wg.Wait()
 
 }
 
 func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
-	columnaActual int, iterChan chan bool) {
+	columnaActual int) {
 
 	// fmt.Printf("nueva reina : %v\n", casillaI)
 	casillasLimpias := limpiar(casillasLibres, casillaI)
@@ -83,14 +62,12 @@ func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
 
 	if len(casillasLimpias) == 0 {
 		// ya no quedan casillas libres
-		// data = append(data, reisColocadas)
 
 		if len(reisColocadas) == tamaño {
 			// aui encontro una combinacion valida
 			// TODO: debe guardar la combinacion como string
 			fmt.Printf("combinacion: %v\n", reisColocadas)
 			combinaciones++
-			iterChan <- true
 			wg.Done()
 		} else {
 			wg.Done()
@@ -111,21 +88,17 @@ func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
 		}
 
 		if len(casillasSiguientes) > 0 {
-			// iteraciones = iteraciones + len(casillasSiguientes)
 			wg.Add(len(casillasSiguientes))
 			for _, casS := range casillasSiguientes {
 				iteraciones++
-				go analizar(casS, casillasLimpias, reisColocadas, columnaActual+1, iterChan)
+				go analizar(casS, casillasLimpias, reisColocadas, columnaActual+1)
 			}
 			wg.Done()
 		} else {
 			// ya no hay casillas de la columna siguiente
 			// y no hay nada que hacer
-			iterChan <- true
 			wg.Done()
-
 		}
-
 	}
 }
 
