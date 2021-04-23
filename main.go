@@ -3,9 +3,12 @@ package main
 import "fmt"
 
 var data = []string{}
+var tamaño = 0
+var iteraciones int = 0
+var combinaciones int = 0
 
 func main() {
-	tamaño := 5
+	tamaño = 4
 	total_casillas := [][]int{}
 
 	for i := 1; i <= tamaño; i++ {
@@ -25,7 +28,10 @@ func main() {
 	// 	{1, 1}, {1, 2}, {1, 3}, {1, 4},
 	// }
 
-	primerAnalisi(4, total_casillas)
+	primerAnalisi(tamaño, total_casillas)
+
+	fmt.Println(iteraciones)
+	fmt.Println(combinaciones)
 
 }
 
@@ -46,25 +52,26 @@ func primerAnalisi(tamaño int, casillasTotales [][]int) {
 }
 
 func analizar(casillaI []int, casillasLibres, reinasColocadas [][]int,
-	columnaActual int,
-) {
+	columnaActual int) {
+
+	iteraciones++
 
 	// fmt.Printf("nueva reina : %v\n", casillaI)
-
 	casillasLimpias := limpiar(casillasLibres, casillaI)
 	// fmt.Printf("limpias : %v\n", casillasLimpias)
-
 	reisColocadas := reinasColocadas
 	// fmt.Printf("reinas: %v\n", casillaI)
-
 	reisColocadas = append(reisColocadas, casillaI)
 
-	if len(casillasLimpias) == 0 {
+	if len(casillasLimpias) == 0 && len(reisColocadas) == tamaño {
 		// ya no quedan casillas libres
+		// aui encontro una combinacion
 		// TODO: debe guardar la combinacion como string
 		// data = append(data, reisColocadas)
-		fmt.Printf("combinacion: %v\n", reisColocadas)
-	} else {
+		// fmt.Printf("combinacion: %v\n", reisColocadas)
+		combinaciones++
+	}
+	if len(casillasLimpias) > 0 {
 		// todavia quedan casillas a analizar
 		casillasSiguientes := [][]int{}
 
